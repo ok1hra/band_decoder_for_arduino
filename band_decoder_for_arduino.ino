@@ -324,12 +324,6 @@ void bandSET() {                                               // set outputs by
     #if defined(REMOTE_RELAY)
         dataB = dataB | (1<<5);  // D13 ON for TCP232 cfg pin (if used)
     #endif
-    Serial.print(dataD, BIN);
-    Serial.print(" | ");
-    Serial.print(dataB, BIN);
-    Serial.print(" | ");
-    Serial.println(dataC, BIN);
-
     PORTD = dataD;
     PORTB = dataB;
     PORTC = dataC;
