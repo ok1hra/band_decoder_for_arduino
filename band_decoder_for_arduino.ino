@@ -5,15 +5,15 @@
 -----------------------------------------------------------
   http://remoteqth.com/arduino-band-decoder.php
   2016-05 by OK1HRA
-  
+
   Inspired by OK1CDJ code, Thanks!
   https://github.com/ok1cdj/ARDUINO-Bandecoder
-  
-  ___               _        ___ _____ _  _                
- | _ \___ _ __  ___| |_ ___ / _ \_   _| || |  __ ___ _ __  
- |   / -_) '  \/ _ \  _/ -_) (_) || | | __ |_/ _/ _ \ '  \ 
+
+  ___               _        ___ _____ _  _
+ | _ \___ _ __  ___| |_ ___ / _ \_   _| || |  __ ___ _ __
+ |   / -_) '  \/ _ \  _/ -_) (_) || | | __ |_/ _/ _ \ '  \
  |_|_\___|_|_|_\___/\__\___|\__\_\|_| |_||_(_)__\___/_|_|_|
-                                                           
+
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,22 +42,23 @@ Outputs
   * Yaesu BCD
   * Serial echo
   * Icom CIV
-  * Kenwood CAT 
+  * Kenwood CAT
   * YAESU CAT - TRX since 2008 ascii format
 
   Changelog
   ---------
+  2017-09 multi output relay support in matrix table
   2016-07 REMOTE_RELAY TCP/IP remote relay - need install and configure TCP232 module
   2016-05 ICOM_CIV  add 'state machine' protection against collisions on CIV bus, TNX KF5SA and N2LEE
   2016-02 YAESU CAT in/output support old binary format (tested on FT-817)
   2016-01 YAESU CAT in/output support since 2015 ascii format
-  
+
 */
 //=====[ Inputs ]=============================================================================================
 
 // #define INPUT_SERIAL       // telnet ascii input - cvs format [band],[freq]\n (serial.h)
- #define ICOM_CIV           // read frequency from CIV (icom_civ.h) ** you must enabled 'CI-V transceive' in TRX settings **
-// #define KENWOOD_PC         // RS232 CAT (kenwood_pc.h)
+// #define ICOM_CIV           // read frequency from CIV (icom_civ.h) ** you must enabled 'CI-V transceive' in TRX settings **
+ #define KENWOOD_PC         // RS232 CAT (kenwood_pc.h)
 // #define YAESU_CAT          // RS232 CAT (yaesu_cat.h) YAESU CAT since 2015 ascii format
 // #define YAESU_CAT_OLD      // Old binary format RS232 CAT (yaesu_cat_old.h) <------- ** tested on FT-817 **
 // #define YAESU_BCD          // TTL BCD in A  (yaesu_bcd.h)
@@ -70,13 +71,13 @@ Outputs
 // #define ICOM_CIV_OUT       // send frequency to CIV ** you must set TRX CIV_ADRESS, and disable ICOM_CIV **
 // #define KENWOOD_PC_OUT     // send frequency to RS232 CAT ** for operation must disable REQUEST **
 // #define YAESU_CAT_OUT      // send frequency to RS232 CAT ** for operation must disable REQUEST **
- #define BCD_OUT            // output 11-14 relay used as Yaesu BCD 
+ #define BCD_OUT            // output 11-14 relay used as Yaesu BCD
 
 //=====[ Settings ]===========================================================================================
 
- #define SERBAUD        9600  // [baud] Serial port in/out baudrate
+ #define SERBAUD        115200  // [baud] Serial port in/out baudrate
  #define WATCHDOG       10    // [sec] determines the time, after which the all relay OFF, if missed next input data - uncomment for the enabled
-// #define REQUEST            // use TXD output for sending frequency request (Kenwood PC, Yaesu CAT, Yaesu CAT old, Icom CIV)
+ #define REQUEST            // use TXD output for sending frequency request (Kenwood PC, Yaesu CAT, Yaesu CAT old, Icom CIV)
  #define CIV_ADRESS   0x56  // CIV input HEX Icom adress (0x is prefix)
 // #define CIV_ADR_OUT  0x56  // CIV output HEX Icom adress (0x is prefix)
 
@@ -86,11 +87,11 @@ Outputs
 
         Band 0 --> */ { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*  If inputs out of range, or WATCHDOG timeout
 \       Band 1 --> */ { 1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
- \      Band 2 --> */ { 0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
-  \     Band 3 --> */ { 0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
-   \    Band 4 --> */ { 0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
-    \   Band 5 --> */ { 0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
-     \  Band 6 --> */ { 0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
+ \      Band 2 --> */ { 0,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
+  \     Band 3 --> */ { 0,  0,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
+   \    Band 4 --> */ { 0,  0,  0,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
+    \   Band 5 --> */ { 0,  0,  0,  0,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
+     \  Band 6 --> */ { 0,  0,  0,  0,  0,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
 IN    ) Band 7 --> */ { 0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0 }, /*
      /  Band 8 --> */ { 0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0 }, /*
     /   Band 9 --> */ { 0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0 }, /*
@@ -99,13 +100,13 @@ IN    ) Band 7 --> */ { 0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  
  /      Band 12 -> */ { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0 }, /*
 /       Band 13 -> */ { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0 }, /*
         Band 14 -> */ { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  0 }, /*
-                        |   |   |   |   |   |   |   |   |   |   |   |   |   | 
-                        V   V   V   V   V   V   V   V   V   V   V   V   V   V   
+                        |   |   |   |   |   |   |   |   |   |   |   |   |   |
+                        V   V   V   V   V   V   V   V   V   V   V   V   V   V
                      -----------------------------------------------------------
                      |  1   2   3   4   5   6   7   8   9  10  11  12  13  14  |
                      -----------------------------------------------------------
                                           OUTPUTS RELAY*/
-        };                                                 
+        };
 //============================================================================================================
 
 /*                     Arduino Ports / in-out layout
@@ -115,12 +116,12 @@ IN    ) Band 7 --> */ { 0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  
 -------------------------------------------------------------------------------
 */
 
-// Hardware key Port bit 0->7 to #out in matrix
-int key[3][8] = {
-      { 15, 15,  1,  2,  3,  4,  5,  6 }, // dataD
-      {  7,  8,  9, 10, 11, 15, 15, 15 }, // dataB
-      { 12, 13, 14, 15, 15, 15, 15, 15 }, // dataC
-}; 
+int key[2][16] = {
+//           PIND                PINB             PINC
+      { 2, 3, 4, 5, 6, 7,   0, 1, 2, 3, 4,   0, 1, 2, 3, 4 }, // bit in port
+      { 3, 3, 3, 3, 3, 3,   1, 1, 1, 1, 1,   2, 2, 2, 2, 2 }, // Ports
+};
+
 int bitNR;
 int dataD;
 int dataB;
@@ -210,7 +211,7 @@ void setup() {
         digitalWrite(13, HIGH);  // for TCP232 cfg pin (if used)
     #endif
 }
-    
+
 void loop() {
     dataD = B00000000;
     dataB = B00000000;
@@ -300,34 +301,41 @@ void bandSET() {                                               // set outputs by
     #else
         BANDs=14;
     #endif
-        if (BAND>=0 && BAND<=BANDs){
-            for (bitNR=0; bitNR<8; bitNR++){ 
-                // D                                          // portD
-                if (matrix[BAND][(key[0][bitNR])-1] == 1){    // read in/out matrix over hw pin key matrix to PORTx
-                    dataD = dataD << 1;                       // move 1 bit left
-                    dataD = dataD | (1<<bitNR);               // 0-th bit to 1
-                }
-                // B                                          // portB
-                if (matrix[BAND][(key[1][bitNR])-1] == 1){
-                    dataB = dataB << 1;
-                    dataB = dataB | (1<<bitNR);
-                }
-                // C                                          // portC
-                if (matrix[BAND][(key[2][bitNR])-1] == 1){
-                    dataC = dataC << 1;
-                    dataC = dataC | (1<<bitNR);
-                }
-            }
-            #if defined(REMOTE_RELAY)
-                dataB = dataB | (1<<5);  // D13 ON for TCP232 cfg pin (if used)
-            #endif
-            PORTD = dataD;
-            PORTB = dataB;
-            PORTC = dataC;
-            #if defined(BCD_OUT)
-                bcdOut();
-            #endif
+    for (bitNR=0; bitNR<BANDs; bitNR++){
+      // port D
+      if(key[1][bitNR]==3){
+        if(matrix[BAND][bitNR]==1){
+          dataD = dataD | (1<<key[0][bitNR]);               // 0-th bit to 1
         }
+      }
+      // port B
+      if(key[1][bitNR]==1){
+        if(matrix[BAND][bitNR]==1){
+          dataB = dataB | (1<<key[0][bitNR]);               // 0-th bit to 1
+        }
+      }
+      // port C
+      if(key[1][bitNR]==2){
+        if(matrix[BAND][bitNR]==1){
+          dataC = dataC | (1<<key[0][bitNR]);               // 0-th bit to 1
+        }
+      }
+    }
+    #if defined(REMOTE_RELAY)
+        dataB = dataB | (1<<5);  // D13 ON for TCP232 cfg pin (if used)
+    #endif
+    Serial.print(dataD, BIN);
+    Serial.print(" | ");
+    Serial.print(dataB, BIN);
+    Serial.print(" | ");
+    Serial.println(dataC, BIN);
+
+    PORTD = dataD;
+    PORTB = dataB;
+    PORTC = dataC;
+    #if defined(BCD_OUT)
+        bcdOut();
+    #endif
 }
 
 //=====[ Output Remote Relay ]======================================================================================
@@ -338,7 +346,7 @@ void remoteRelay() {
     Serial.print(BAND, DEC);
     Serial.print('\n');
     Serial.flush();
-} 
+}
 
 //=====[ Output serial ]======================================================================================
 
@@ -349,7 +357,7 @@ void serialEcho() {
     Serial.print(freq);
     Serial.println(">");
     Serial.flush();
-} 
+}
 
 //=====[ Output BCD ]=========================================================================================
 
@@ -404,8 +412,8 @@ void serialEcho() {
             case 5: if( b == 0x00 || b == 0x03 ){state = 8; rdI[4]=b; }else{ state = 1;}; break;
 
             case 6: if( b == 0x00 || b == 0xE0 || b == 0xF1 ){ state = 7; rdI[3]=b; }else{ state = 1;}; break;  // select command $05
-            case 7: if( b == 0x00 || b == 0x05 ){ state = 8; rdI[4]=b; }else{ state = 1;}; break;            
-            
+            case 7: if( b == 0x00 || b == 0x05 ){ state = 8; rdI[4]=b; }else{ state = 1;}; break;
+
             case 8: if( b <= 0x99 ){state = 9; rdI[5]=b; }else{state = 1;}; break;
             case 9: if( b <= 0x99 ){state = 10; rdI[6]=b; }else{state = 1;}; break;
            case 10: if( b <= 0x99 ){state = 11; rdI[7]=b; }else{state = 1;}; break;
@@ -431,12 +439,12 @@ void serialEcho() {
             for (int x=8; x>=0; x=x-2){                       // loop for 5x2 char [xx xx xx xx xx]
                 freqCIVtxPart = freqCIVtx.substring(x,x+2);   // cut freq to five part
                     Serial.write(hexToDec(freqCIVtxPart));    // HEX to DEC, because write as DEC format from HEX variable
-            }                    
+            }
         }
         Serial.write(253);                                    // FD
         Serial.flush();
     }
-    
+
     unsigned int hexToDec(String hexString) {
         unsigned int decValue = 0;
         int nextInt;
